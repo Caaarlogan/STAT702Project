@@ -1,23 +1,66 @@
 ---
-title: "Lab9"
+title: "Project"
 author: "Carlo Carbonilla"
 date: "13/05/2021"
 output: pdf_document
 ---
+```{r}
+library(dplyr)
+```
+
+Question 1.
+
+(a)
 
 ```{r}
 sales <- read.csv(file = 'STAT702_project_sales_data.csv')
-```
-
-```{r}
 head(sales)
 ```
 
+
+Convert week column from character to date type
 ```{r}
-productSales %>% sales
+sales$week <- as.Date(sales$week, format =  "%d/%m/%y")
+head(sales)
+```
+
+Filter dataframe to dates in 2012 and with the product sku of 216419
+```{r}
+productSales <- sales %>% filter(sku_id == 216419)
+productSales
+```
+
+```{r}
+
 ```
 
 
+Question 2.
+
+Filter dataframe to dates in 2012 and with the product sku of 216419
+```{r}
+productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id == 216419)
+head(productSales2012)
+```
+
+i.
+```{r}
+productSales2012
+```
+
+Setup cost = $130 per order
+Holding cost = $1.50 per unit per year
+
+k = order or setup cost
+A = Number of items demanded per annum
+c = purchase cost per item
+h = holding cost per item per annum
+Q* = optimum order quantity (number of items)
+T = time between order = length of the inventory cycle = Q/A
+
+
+Tc = Annual inventory cost = Annual order cost + Annual holding cost
+   = 130*Q + 1.5
 
 
 

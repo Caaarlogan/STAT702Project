@@ -6,6 +6,8 @@ output: pdf_document
 ---
 ```{r}
 library(dplyr)
+library(tidyverse)
+library(lubridate)
 ```
 
 Question 1.
@@ -30,16 +32,57 @@ productSales <- sales %>% filter(sku_id == 216419)
 productSales
 ```
 
+Sum units sold by month and year
 ```{r}
+Month <- month(productSales$week)
+Year <- year(productSales$week)
 
+monthlySales <- aggregate(cbind(units_sold)~Month+Year,
+             data=productSales,FUN=sum)
+
+monthlySales$MonthYear <- as.Date(paste(1,monthlySales$Month,monthlySales$Year,sep="/"), format="%d/%m/%Y")
+
+monthlySales
 ```
 
 
+```{r}
+ggplot(monthlySales, aes(MonthYear, units_sold, group=1)) + 
+  geom_line() +
+  geom_point() +
+  scale_x_date(date_breaks = "1 month", date_labels = "%m-%Y") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  ggtitle("Monthly Sales") +
+  xlab("Month and Year") +
+  ylab("Units Sold")
+```
+
+(b)
+
+Sum units sold by month and year
+```{r}
+StoreID <- productSales$store_id
+
+storeSales <- aggregate(cbind(units_sold)~StoreID,
+             data=productSales,FUN=sum)
+
+storeSales
+```
+
+```{r}
+ggplot(storeSales, aes(StoreID, units_sold, group=1)) + 
+  geom_point() + geom_text(aes(label=StoreID),hjust=0, vjust=0, size=3.5) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  ggtitle("Sales for Each Store from 2011-2013") +
+  xlab("Store ID") +
+  ylab("Units Sold")
+```
+
 Question 2.
 
-Filter dataframe to dates in 2012 and with the product sku of 216419
+Filter dataframe to dates in 2012 and with the product sku of 216233
 ```{r}
-productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id == 216419)
+productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id == 216233)
 head(productSales2012)
 ```
 

@@ -1,0 +1,44 @@
+---
+title: "Lab9"
+author: "Carlo Carbonilla"
+date: "13/05/2021"
+output: pdf_document
+---
+
+```{r}
+sales <- read.csv(file = 'STAT702_project_sales_data.csv')
+```
+
+```{r}
+head(sales)
+```
+
+```{r}
+productSales %>% sales
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

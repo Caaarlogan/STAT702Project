@@ -4,35 +4,44 @@ author: "Carlo Carbonilla"
 date: "13/05/2021"
 output: pdf_document
 ---
+
+Load the required Packages.
+
 ```{r}
+#Loading the Packages
 library(dplyr)
 library(tidyverse)
 library(lubridate)
 ```
 
-Question 1.
+Question 1. 
 
-(a)
+Solution 1.a) 
+
+Import the data from STAT702_project_sales_data.csv file.
 
 ```{r}
 sales <- read.csv(file = 'STAT702_project_sales_data.csv')
 head(sales)
 ```
 
+To format week as a date, first step is to Convert week column from character to date type.
+And then, use the lubridate function to extract the month.
 
-Convert week column from character to date type
 ```{r}
 sales$week <- as.Date(sales$week, format =  "%d/%m/%y")
 head(sales)
 ```
 
-Filter dataframe to dates in 2012 and with the product sku of 216419
+Given the project requirements, Filtering dataframe to dates in 2012 and with the product sku of 216419 (assigned to group #2)
+
 ```{r}
 productSales <- sales %>% filter(sku_id == 216419)
 productSales
 ```
 
-Sum units sold by month and year
+Here the variables Month and Year witholds the total number of units sold by month and year respectively,
+
 ```{r}
 Month <- month(productSales$week)
 Year <- year(productSales$week)
@@ -45,6 +54,9 @@ monthlySales$MonthYear <- as.Date(paste(1,monthlySales$Month,monthlySales$Year,s
 monthlySales
 ```
 
+There are 31 rows resides in the table where each row represents a month starting from January 2011 all the way till July 2013 (31 Months).
+
+Furtherfore, this table has laid the foundation to help plotting the data on a graph to observe any trends/patterns. 
 
 ```{r}
 ggplot(monthlySales, aes(MonthYear, units_sold, group=1)) + 
@@ -57,7 +69,13 @@ ggplot(monthlySales, aes(MonthYear, units_sold, group=1)) +
   ylab("Units Sold")
 ```
 
-(b)
+
+This plot shows that the montly sales over a period of time for the Product ID- 216419 which has been fluctuating with in $15000 and $25000. However, the sales went unreasonably over $35000 in January 2012 which could be either because of New year's holiday weekend or some other unknown factors. It's best to remove the July 2013 sales out of the analysis it only contains 7 days sales total. 
+To sum it up, this plot describes the increase and decrease in product sale each month
+
+
+
+Solution 1.b) 
 
 Sum units sold by month and year
 ```{r}

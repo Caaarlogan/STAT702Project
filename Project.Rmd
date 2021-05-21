@@ -2,7 +2,9 @@
 title: "Project"
 author: "Carlo Carbonilla"
 date: "13/05/2021"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 Load the required Packages.
@@ -70,30 +72,68 @@ ggplot(monthlySales, aes(MonthYear, units_sold, group=1)) +
 ```
 
 
-This plot shows that the montly sales over a period of time for the Product ID- 216419 which has been fluctuating with in $15000 and $25000. However, the sales went unreasonably over $35000 in January 2012 which could be either because of New year's holiday weekend or some other unknown factors. It's best to remove the July 2013 sales out of the analysis it only contains 7 days sales total. 
+This plot shows that the montly sales over a period of time for the Product ID- 216419 which has been fluctuating with in \$15000 and \$25000. However, the sales went unreasonably over $35000 in January 2012 which could be either because of New year's holiday weekend or some other unknown factors. It's best to remove the July 2013 sales out of the analysis it only contains 7 days sales total. 
 To sum it up, this plot describes the increase and decrease in product sale each month
 
 
 
 Solution 1.b) 
 
-Sum units sold by month and year
+Sum total units sold by each store
 ```{r}
 StoreID <- productSales$store_id
 
 storeSales <- aggregate(cbind(units_sold)~StoreID,
              data=productSales,FUN=sum)
 
+storeSales$StoreID <- as.character(storeSales$StoreID)
+
 storeSales
 ```
 
 ```{r}
-ggplot(storeSales, aes(StoreID, units_sold, group=1)) + 
-  geom_point() + geom_text(aes(label=StoreID),hjust=0, vjust=0, size=3.5) +
+ggplot(data=storeSales, aes(x=reorder(StoreID, -units_sold), y=units_sold)) +
+  geom_bar(stat="identity", fill="steelblue") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  ggtitle("Sales for Each Store from 2011-2013") +
-  xlab("Store ID") +
-  ylab("Units Sold")
+  labs(title = "Total Units Sold of Stores", y = "Units Sold", x = "Store ID")
+```
+
+Summary of all sales
+```{r}
+summary(storeSales)
+```
+
+```{r}
+top10Sales <- head(storeSales %>% arrange(desc(units_sold)),10)
+top10Sales
+```
+
+Graph of Top 10 Stores
+```{r}
+ggplot(data=top10Sales, aes(x=reorder(StoreID, -units_sold), y=units_sold)) +
+  geom_bar(stat="identity", fill="steelblue") +
+  geom_text(aes(label=units_sold), vjust=1.6, color="white", size=3.5) +
+  labs(title = "Top 10 Stores in Units Sold", y = "Units Sold", x = "Store ID")
+```
+```{r}
+summary(top10Sales)
+```
+
+Bottom 10 Stores in Units Sold
+```{r}
+bottom10Sales <- head(storeSales %>% arrange(units_sold),10)
+bottom10Sales
+```
+
+Graph of Bottom 10 Stores
+```{r}
+ggplot(data=bottom10Sales, aes(x= reorder(StoreID, units_sold), y=units_sold)) +
+  geom_bar(stat="identity", fill="steelblue") +
+  geom_text(aes(label=units_sold), vjust=1.6, color="white", size=3.5) +
+  labs(title = "Bottom 10 Stores in Units Sold", y = "Units Sold", x = "Store ID")
+```
+```{r}
+summary(bottom10Sales)
 ```
 
 Question 2.
@@ -122,10 +162,6 @@ T = time between order = length of the inventory cycle = Q/A
 
 Tc = Annual inventory cost = Annual order cost + Annual holding cost
    = 130*Q + 1.5
-
-
-
-
 
 Question 3.
 

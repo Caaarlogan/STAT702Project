@@ -2,7 +2,9 @@
 title: "Project"
 author: "Carlo Carbonilla"
 date: "13/05/2021"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 Load the required Packages.
@@ -88,7 +90,24 @@ storeSales
 ```
 
 ```{r}
-ggplot(storeSales, aes(StoreID, units_sold, group=1)) + 
+top10Sales <- head(storeSales %>% arrange(desc(units_sold)),10)
+top10Sales
+```
+
+```{r}
+bottom10Sales <- head(storeSales %>% arrange(units_sold),10)
+bottom10Sales
+```
+
+```{r}
+ggplot(data=top10Sales, aes(x=StoreID, y=units_sold)) +
+  geom_bar(stat="identity", fill="steelblue") +
+  geom_text(aes(label=units_sold), vjust=1.6, color="white", size=3.5)
+```
+
+
+```{r}
+ggplot(top10Sales, aes(StoreID, units_sold, group=1)) + 
   geom_point() + geom_text(aes(label=StoreID),hjust=0, vjust=0, size=3.5) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   ggtitle("Sales for Each Store from 2011-2013") +

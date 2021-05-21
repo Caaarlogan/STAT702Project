@@ -165,7 +165,18 @@ Start here:
 
 ```{r}
 library(dplyr)
-text_df <- tibble(line = 1:4, text = text)
+data <- selectedProduct %>%
+mutate(linenumber = row_number());
+head(data)
 ```
 
+
+```{r}
+install.packages("tidytext")
+library(tidytext)
+```
+
+```{r}
+
+```
 

@@ -127,22 +127,45 @@ Tc = Annual inventory cost = Annual order cost + Annual holding cost
 
 
 
+Question 3.
+
+Load the data
+
+```{r}
+review <- read.csv(file = 'STAT702_project_reviews_data.csv')
+head(review)
+```
+
+Filter the product given to our group
+
+```{r}
+selectedProduct <- review %>% filter(asin == "B00005249G")
+selectedProduct
+```
+
+```{r}
+summary(selectedProduct)
+```
+
+
+```{r}
+ggplot(selectedProduct, aes(overall)) + 
+  geom_bar() 
+```
+
+
+Explanation:
 
 
 
+3b)
+
+Start here:
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+```{r}
+library(dplyr)
+text_df <- tibble(line = 1:4, text = text)
+```
 
 

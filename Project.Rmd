@@ -57,7 +57,6 @@ monthlySales
 ```
 
 There are 31 rows resides in the table where each row represents a month starting from January 2011 all the way till July 2013 (31 Months).
-
 Furtherfore, this table has laid the foundation to help plotting the data on a graph to observe any trends/patterns. 
 
 ```{r}
@@ -77,9 +76,10 @@ To sum it up, this plot describes the increase and decrease in product sale each
 
 
 
-Solution 1.b) 
+##Solution 1.b) 
 
-Sum total units sold by each store
+First of all, we need to sum the total units sold by each store, so that further analysis can be drawn.
+
 ```{r}
 StoreID <- productSales$store_id
 
@@ -91,6 +91,9 @@ storeSales$StoreID <- as.character(storeSales$StoreID)
 storeSales
 ```
 
+Store Id with respect to units sold by that store. Store with ID:8023 has max number of sales which is close to 29000 units followed by store ID 9613.
+In order to draw comparison, let's make a plot using geom_bar and see the sales trend between the various stores. However, there are some stores where the sale numbers are relatively low. For instance, store id: 9001 sold the least number of units (1095 only). Therefore, apprximately 9000 is the average unit sold ratio among all the store. 
+
 ```{r}
 ggplot(data=storeSales, aes(x=reorder(StoreID, -units_sold), y=units_sold)) +
   geom_bar(stat="identity", fill="steelblue") +
@@ -98,17 +101,24 @@ ggplot(data=storeSales, aes(x=reorder(StoreID, -units_sold), y=units_sold)) +
   labs(title = "Total Units Sold of Stores", y = "Units Sold", x = "Store ID")
 ```
 
-Summary of all sales
+Summary of sales of all the store collectively. Looking at the graph above we get an idea of what a good performing store looks like and on the right hand side of the graph are the stores that are not performing so well. 
+
 ```{r}
 summary(storeSales)
 ```
+
+Given there are 67 stores in total with the sales mean of ~9000 units per store. Therefore, the stores that had sold more that 9000 units can be considered as good performing store. On the other hand, stores that sold below 9000 units can be categorized as the less/poor performing stores.
+To drill this down further, making a new variable called top10Sales which withholds the top 10 performing stores based of the number of units sold.
 
 ```{r}
 top10Sales <- head(storeSales %>% arrange(desc(units_sold)),10)
 top10Sales
 ```
 
+All of those 10 store are well above the mean calculated earlier.
+
 Graph of Top 10 Stores
+
 ```{r}
 ggplot(data=top10Sales, aes(x=reorder(StoreID, -units_sold), y=units_sold)) +
   geom_bar(stat="identity", fill="steelblue") +
@@ -119,13 +129,17 @@ ggplot(data=top10Sales, aes(x=reorder(StoreID, -units_sold), y=units_sold)) +
 summary(top10Sales)
 ```
 
-Bottom 10 Stores in Units Sold
+Hence, this is the data that will be presented to the General Manager Sales.
+
+Similarly, bottom10Sales variable withholds the sales record of the 10 least performing stores. 
+
 ```{r}
 bottom10Sales <- head(storeSales %>% arrange(units_sold),10)
 bottom10Sales
 ```
 
-Graph of Bottom 10 Stores
+Graph of Bottom 10 Stores.
+
 ```{r}
 ggplot(data=bottom10Sales, aes(x= reorder(StoreID, units_sold), y=units_sold)) +
   geom_bar(stat="identity", fill="steelblue") +
@@ -135,6 +149,11 @@ ggplot(data=bottom10Sales, aes(x= reorder(StoreID, units_sold), y=units_sold)) +
 ```{r}
 summary(bottom10Sales)
 ```
+
+All of the store above are well below the mean calculated earlier. Therefore, this step by step approach is useful to understand the sale trends between the stores and how well/poor are they performing. There are store with high selling numbers which could be based on the customer base, location of the store of the selling techniques used by employees (Sales driven culture) where as there are store with less selling numbers which again could depend upon the various factors. 
+However, the data and the visuals created above put a baseline for the Management to create strategies on how the sale can be lifted and what are the stores that requires  more attention.
+
+
 
 Question 2.
 
@@ -162,6 +181,11 @@ T = time between order = length of the inventory cycle = Q/A
 
 Tc = Annual inventory cost = Annual order cost + Annual holding cost
    = 130*Q + 1.5
+
+
+
+
+
 
 Question 3.
 

@@ -195,7 +195,6 @@ round(Q,0)
 optimum order quantity = 5422
 
 Find time between the orders
-
 ```{r}
 T <- 365 * sqrt(2*k/(A*h)) # inventory cycle 
 round(T,0)
@@ -223,42 +222,105 @@ p
 Find economic order quantity
 ```{r}
 Q <- sqrt(2*k*A/h) * sqrt((p+h)/p)
-round(Q, 0)
+Q <- round(Q, 0)
+Q
 ```
 
 Find maximum level stock
 ```{r}
 S <- sqrt(2*k*A/h) * sqrt(p/(p+h))
-round(S, 0)
+S <- round(S, 0)
+S
 ```
 
 Find optimum time between orders
 ```{r}
 t <- 365*Q/A
-round(t,0)
+t <- round(t,0)
+t
 ```
+
+Find in stock times
+```{r}
+t1 <- 365*(S/A)
+t1 <- round(t1,0)
+t1
+```
+
+Find out of stock times
+```{r}
+t2 <- t-t1
+t2
+```
+
+Plot back order model
+```{r}
+plot(0, xlim = c(0, 2*t), ylim = c(-Q+S, S), type = "n",
+     xlab = "Time (days)", ylab = "Stock level",
+     main = "Inventory cycles for product 216233")
+
+segments(x0 = c(0,t), y0 = S, x1 = c(t,2*t), y1 = -Q+S) # diagonals
+segments(x0 = c(0,t), y0 = -Q+S, x1 = c(0,t), y1 = S)   # vertical
+segments(x0 = 0, y0 = 0, x1 = 2*t, y1 = 0)              # horizontal
+```
+
 
 Find proportion of time the company have to take backorders
 ```{r}
-t1 <- 365*(S/A)
-100*(t-t1)/t
+round(100*(t-t1)/t,0)
 ```
+
 
 Find total annual inventory cost
 ```{r}
 round(k*A/Q + h/2 * S^2/Q + p/2 * (Q-S)^2 /Q,2)
 ```
 
-iii.
+
+(b)
+
 
 ```{r}
-plot(0, xlim = c(0, 2*t), ylim = c(0, Q), type = "n",
-     xlab = "Time (days)", ylab = "Stock level",
-     main = "Inventory cycles for product 216233")
-
-segments(x0 = c(0,t), y0 = Q, x1 = c(t,2*t), y1 = 0) # diagonals
-segments(x0 = c(0,t), y0 = 0, x1 = c(0,t), y1 = Q)   # vertical
+productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id == 216425)
+head(productSales2012)
 ```
+
+
+Find annual demand
+```{r}
+D <- sum(productSales2012$units_sold) # Annual demand
+D
+```
+
+Find optimal order quantity
+```{r}
+co <- 20.5 # order cost
+ch <- 6.5  # holding cost
+Q <- round(sqrt(2 * D * co / ch), 0) # optimal order quantity
+Q
+```
+
+
+Find weekly units sold
+```{r}
+saleWeek <- productSales2012$week
+
+weeklySales <- aggregate(cbind(units_sold)~saleWeek,
+             data=productSales2012,FUN=sum)
+
+weeklySales
+```
+
+
+Graph weekly units sold
+```{r}
+hist(weeklySales$units_sold)
+```
+
+```{r}
+
+```
+
 
 
 

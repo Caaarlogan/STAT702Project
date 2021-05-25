@@ -159,9 +159,10 @@ Question 2.
 
 (a)
 
-i.
+i. Businesses these days have adapted the concept of overstocking for the purpose of satisfying customer needs in a specific period of time. But it turns out to be a costly process and requires high capital investment. Therefore, ir is very vital for companies to do an adequate stock control and handle inventory on issues in realtime. Hence, the Economic Order Quantity model (EOQ model) comes into existance. 
 
-Filter dataframe to dates in 2012 and with the product sku of 216233
+To perform the required analysis, first step is to filter the dataframe to include only the dates with 2012 with the product SkuID = 216233
+
 ```{r}
 productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id == 216233)
 head(productSales2012)
@@ -174,25 +175,32 @@ h = holding cost per item per annum
 Q* = optimum order quantity (number of items)
 T = time between order = length of the inventory cycle = Q/A
 
-Find total units sold for 2012
+Step 2 is to calculate the total units sold by all the stores collectively over the year 2012.
+
 ```{r}
 A <- sum(productSales2012$units_sold) # Annual demand
 A
 ```
 
-Find economic order quantity
+Here, we got the total number of units sold by the store are 169591
+
+Thus, the calculations performed aboves gives us the base to calculate the optimum order quantity (Q)
+
 ```{r}
 k <- 130 # ordering cost
 h <- 1.5 # holding cost
 Q <- sqrt((2*k*A) / h) # optimum order quantity 
 round(Q,0)
 ```
+optimum order quantity = 5422
 
-Find time between order
+Find time between the orders
+
 ```{r}
 T <- 365 * sqrt(2*k/(A*h)) # inventory cycle 
 round(T,0)
 ```
+Time between the orders T aka Intervory cycle = 12
 
 Find annual inventory cost
 ```{r}
@@ -200,7 +208,7 @@ inv_cost_ann <- k*(A/Q) + h*(Q/2) # annual inventory cost
 inv_cost_ann
 ```
 
-During 2012, 169591 units of this product was sold and is assumed to be A, the number of items demanded per annum. Based on the 2012 sales, the company should order 5422 units of the product every 12 days. The annual inventory cost is $8132.68
+To summarize the analysis above, there were 169591 units of this product was sold and is assumed to be A, the number of items demanded per annum. Based on the 2012 sales, the company should order 5422 units of the product every 12 days. The annual inventory cost is $8132.68
 
 
 ii.

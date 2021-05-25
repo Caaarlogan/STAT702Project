@@ -157,34 +157,63 @@ However, the data and the visuals created above put a baseline for the Managemen
 
 Question 2.
 
+(a)
+
+i.
+
 Filter dataframe to dates in 2012 and with the product sku of 216233
 ```{r}
 productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id == 216233)
 head(productSales2012)
 ```
 
-i.
-```{r}
-productSales2012
-```
-
-Setup cost = $130 per order
-Holding cost = $1.50 per unit per year
-
-k = order or setup cost
-A = Number of items demanded per annum
+k = setup cost
+A = number of items demanded per annum
 c = purchase cost per item
 h = holding cost per item per annum
 Q* = optimum order quantity (number of items)
 T = time between order = length of the inventory cycle = Q/A
 
+Find total units sold for 2012
+```{r}
+A <- sum(productSales2012$units_sold) # Annual demand
+A
+```
 
-Tc = Annual inventory cost = Annual order cost + Annual holding cost
-   = 130*Q + 1.5
+Find economic order quantity
+```{r}
+k <- 130 # ordering cost
+h <- 1.5 # holding cost
+Q <- sqrt((2*k*A) / h) # optimum order quantity 
+round(Q,0)
+```
+
+Find time between order
+```{r}
+T <- 365 * sqrt(2*k/(A*h)) # inventory cycle 
+round(T,0)
+```
+
+Find annual inventory cost
+```{r}
+inv_cost_ann <- k*(A/Q) + h*(Q/2) # annual inventory cost
+inv_cost_ann
+```
+
+During 2012, 169591 units of this product was sold and is assumed to be A, the number of items demanded per annum. Based on the 2012 sales, the company should order 5422 units of the product every 12 days. The annual inventory cost is $8132.68
 
 
+ii.
 
+Find total price per unit
+```{r}
+p = 0.05 * (inv_cost_ann/A)
+p
+```
 
+```{r}
+
+```
 
 
 Question 3.
@@ -224,19 +253,9 @@ Start here:
 
 
 ```{r}
-library(dplyr)
 data <- selectedProduct %>%
 mutate(linenumber = row_number());
 head(data)
 ```
 
-
-```{r}
-install.packages("tidytext")
-library(tidytext)
-```
-
-```{r}
-
-```
 

@@ -16,6 +16,9 @@ library(tidyverse)
 library(lubridate)
 library(wordcloud)
 library('reshape2')
+library(moments)
+library(nortest)
+library("MASS")
 ```
 
 Question 1. 
@@ -281,25 +284,11 @@ round(k*A/Q + h/2 * S^2/Q + p/2 * (Q-S)^2 /Q,2)
 
 (b)
 
+i.
 
 ```{r}
 productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id == 216425)
 head(productSales2012)
-```
-
-
-Find annual demand
-```{r}
-D <- sum(productSales2012$units_sold) # Annual demand
-D
-```
-
-Find optimal order quantity
-```{r}
-co <- 20.5 # order cost
-ch <- 6.5  # holding cost
-Q <- round(sqrt(2 * D * co / ch), 0) # optimal order quantity
-Q
 ```
 
 
@@ -316,14 +305,159 @@ weeklySales
 
 Graph weekly units sold
 ```{r}
-hist(weeklySales$units_sold)
+hist(weeklySales$units_sold, main = "Demand for product 216425", 
+xlab = "Weekly units sold")
 ```
 
 ```{r}
+mean(weeklySales$units_sold)
+sd(weeklySales$units_sold)
+```
 
+```{r}
+skewness(weeklySales$units_sold)
+kurtosis(weeklySales$units_sold)
+```
+
+Based on the histogram, the distribution of demand seems to be normal. However, the skewness of the data is about -0.48 which is not very close 
+to 0. The negative value indicates that the data that are skewed left. In addition, the kurtosis is about 3.91 which is greater than 3, which tends to have heavier tails than the number distribution. So, before fitting, we need to conduct goodness-of-fit test.
+
+
+```{r}
+shapiro.test(weeklySales$units_sold)
+```
+
+```{r}
+lillie.test(weeklySales$units_sold)
+```
+
+The p-value for both tests is higher 0.05, we accept null hypothesis that data come from a normal distribution.
+
+Fitting normal distribution
+```{r}
+fitnorm <- fitdistr(weeklySales$units_sold, "normal")
+fitnorm
+```
+
+Find reorder point
+```{r}
+qnorm(0.95, 2057, 518)
 ```
 
 
+```{r}
+hist(weeklySales$units_sold, main = "Demand for product 216425", xlab = "Lead-Time Demand", prob = TRUE)
+
+curve(dnorm(x, 2057, 518), 
+from=0, to=3500,
+col="blue", lty=1, add=TRUE)
+
+segments(x0 = 2909, y0 = 0, x1 = 2909, y1 = 8e-4)   # vertical
+```
+
+This is the lead time demand distribution, a normal distribution with a mean of 2057 and a standard deviation of 518. The reorder point r of 2909 allows 5% chance of a stock-out.
+
+
+Find annual demand
+```{r}
+D <- 2057 * 52
+D
+```
+
+The annual demand is the expected weekly demand multiplied by 52, the amount of weeks in a year, which is 106964
+
+
+Find optimal order quantity
+```{r}
+co <- 20.5 # order cost
+ch <- 6.5  # holding cost
+Q <- round(sqrt(2 * D * co / ch), 0) # optimal order quantity
+Q
+```
+The optimal order quantity is 821 units 
+
+ii.
+
+```{r}
+productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id == 216419)
+head(productSales2012)
+```
+
+
+Find weekly units sold
+```{r}
+saleWeek <- productSales2012$week
+
+weeklySales <- aggregate(cbind(units_sold)~saleWeek,
+             data=productSales2012,FUN=sum)
+
+weeklySales
+```
+
+
+Graph weekly units sold
+```{r}
+hist(weeklySales$units_sold, main = "Demand for product 216419", 
+xlab = "Weekly units sold")
+```
+
+```{r}
+mean(weeklySales$units_sold)
+sd(weeklySales$units_sold)
+```
+
+```{r}
+skewness(weeklySales$units_sold)
+kurtosis(weeklySales$units_sold)
+```
+
+Based on the histogram, the distribution of demand seems to be normal. However, the skewness of the data is about 2.18 which is not very close 
+to 0. The positive value indicates that the data that are skewed right. In addition, the kurtosis is about 9.64 which is greater than 3, which tends to have heavier tails than the number distribution. So, before fitting, we need to conduct goodness-of-fit test.
+
+
+```{r}
+shapiro.test(weeklySales$units_sold)
+```
+
+```{r}
+lillie.test(weeklySales$units_sold)
+```
+
+The p-value for both tests is lower 0.05, we refuse the null hypothesis that data come from a normal distribution.
+
+Fitting normal distribution
+```{r}
+fitnorm <- fitdistr(weeklySales$units_sold, "normal")
+fitnorm
+```
+
+```{r}
+hist(weeklySales$units_sold, main = "Demand for product 216425", xlab = "Weekly units sold", prob = TRUE)
+
+curve(dnorm(x, fitnorm$estimate[1], fitnorm$estimate[2]), 
+from=0, to=max(weeklySales$units_sold),
+col="blue", lty=1, add=TRUE)
+```
+
+This is the lead time demand distribution, a normal distribution with a mean of 4582 and a standard deviation of 1260.
+
+
+Find annual demand
+```{r}
+D <- 4582 * 52
+D
+```
+
+The annual demand is the expected weekly demand multiplied by 52, the amount of weeks in a year, which is 106964
+
+
+Find optimal order quantity
+```{r}
+co <- 20.5 # order cost
+ch <- 6.5  # holding cost
+Q <- round(sqrt(2 * D * co / ch), 0) # optimal order quantity
+Q
+```
 
 
 Question 3.

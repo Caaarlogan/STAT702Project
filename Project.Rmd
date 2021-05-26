@@ -347,7 +347,8 @@ summary(selectedProduct)
 
 ```{r}
 ggplot(selectedProduct, aes(overall)) + 
-  geom_bar() 
+  geom_bar() +
+  ggtitle("Overall Review Rating for Product ID: B00005249G")
 ```
 
 
@@ -366,4 +367,33 @@ mutate(linenumber = row_number());
 head(data)
 ```
 
+```{r}
+library(tidytext)
+```
 
+
+
+```{r}
+data <- selectedProduct %>%
+mutate(linenumber = row_number());
+head(data)
+```
+
+
+
+
+```{r}
+data <- selectedProduct %>%
+mutate(linenumber = row_number());
+head(data)
+```
+
+
+
+
+
+```{r}
+data <- selectedProduct %>%
+mutate(linenumber = row_number());
+head(data)
+```

@@ -1,15 +1,14 @@
 ---
 title: "Project"
-author: "Carlo Carbonilla"
+author: "Carlo Carbonilla & Pankaj Prashar"
 date: "13/05/2021"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
 
-Load the required Packages.
-
-```{r}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #Loading the Packages
 library(dplyr)
 library(tidyverse)
@@ -19,37 +18,38 @@ library('reshape2')
 library(moments)
 library(nortest)
 library("MASS")
+library(tidytext)
 ```
 
-Question 1. 
+# Question 1. 
 
-Solution 1.a) 
+## Solution 1.a) 
 
 Import the data from STAT702_project_sales_data.csv file.
 
-```{r}
+```{r, echo=FALSE}
 sales <- read.csv(file = 'STAT702_project_sales_data.csv')
-head(sales)
+knitr::kable(head(sales), "simple")
 ```
 
 To format week as a date, first step is to Convert week column from character to date type.
 And then, use the lubridate function to extract the month.
 
-```{r}
+```{r, echo=FALSE, results=FALSE}
 sales$week <- as.Date(sales$week, format =  "%d/%m/%y")
-head(sales)
+knitr::kable(head(sales), "simple")
 ```
 
 Given the project requirements, Filtering dataframe to dates in 2012 and with the product sku of 216419 (assigned to group #2)
 
-```{r}
+```{r, echo=FALSE}
 productSales <- sales %>% filter(sku_id == 216419)
-productSales
+knitr::kable(head(productSales), "simple")
 ```
 
 Here the variables Month and Year witholds the total number of units sold by month and year respectively,
 
-```{r}
+```{r, echo=FALSE}
 Month <- month(productSales$week)
 Year <- year(productSales$week)
 
@@ -58,13 +58,13 @@ monthlySales <- aggregate(cbind(units_sold)~Month+Year,
 
 monthlySales$MonthYear <- as.Date(paste(1,monthlySales$Month,monthlySales$Year,sep="/"), format="%d/%m/%Y")
 
-monthlySales
+knitr::kable(head(monthlySales), "simple")
 ```
 
 There are 31 rows resides in the table where each row represents a month starting from January 2011 all the way till July 2013 (31 Months).
 Furtherfore, this table has laid the foundation to help plotting the data on a graph to observe any trends/patterns. 
 
-```{r}
+```{r, echo=FALSE}
 ggplot(monthlySales, aes(MonthYear, units_sold, group=1)) + 
   geom_line() +
   geom_point() +
@@ -81,11 +81,11 @@ To sum it up, this plot describes the increase and decrease in product sale each
 
 
 
-##Solution 1.b) 
+## Solution 1.b) 
 
 First of all, we need to sum the total units sold by each store, so that further analysis can be drawn.
 
-```{r}
+```{r, echo=FALSE}
 StoreID <- productSales$store_id
 
 storeSales <- aggregate(cbind(units_sold)~StoreID,
@@ -93,13 +93,13 @@ storeSales <- aggregate(cbind(units_sold)~StoreID,
 
 storeSales$StoreID <- as.character(storeSales$StoreID)
 
-storeSales
+knitr::kable(head(storeSales), "simple")
 ```
 
 Store Id with respect to units sold by that store. Store with ID:8023 has max number of sales which is close to 29000 units followed by store ID 9613.
 In order to draw comparison, let's make a plot using geom_bar and see the sales trend between the various stores. However, there are some stores where the sale numbers are relatively low. For instance, store id: 9001 sold the least number of units (1095 only). Therefore, apprximately 9000 is the average unit sold ratio among all the store. 
 
-```{r}
+```{r, echo=FALSE}
 ggplot(data=storeSales, aes(x=reorder(StoreID, -units_sold), y=units_sold)) +
   geom_bar(stat="identity", fill="steelblue") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
@@ -108,29 +108,29 @@ ggplot(data=storeSales, aes(x=reorder(StoreID, -units_sold), y=units_sold)) +
 
 Summary of sales of all the store collectively. Looking at the graph above we get an idea of what a good performing store looks like and on the right hand side of the graph are the stores that are not performing so well. 
 
-```{r}
+```{r, echo=FALSE, results=FALSE}
 summary(storeSales)
 ```
 
 Given there are 67 stores in total with the sales mean of ~9000 units per store. Therefore, the stores that had sold more that 9000 units can be considered as good performing store. On the other hand, stores that sold below 9000 units can be categorized as the less/poor performing stores.
 To drill this down further, making a new variable called top10Sales which withholds the top 10 performing stores based of the number of units sold.
 
-```{r}
+```{r, echo=FALSE}
 top10Sales <- head(storeSales %>% arrange(desc(units_sold)),10)
-top10Sales
+knitr::kable(head(top10Sales), "simple")
 ```
 
 All of those 10 store are well above the mean calculated earlier.
 
 Graph of Top 10 Stores
 
-```{r}
+```{r, echo=FALSE}
 ggplot(data=top10Sales, aes(x=reorder(StoreID, -units_sold), y=units_sold)) +
   geom_bar(stat="identity", fill="steelblue") +
   geom_text(aes(label=units_sold), vjust=1.6, color="white", size=3.5) +
   labs(title = "Top 10 Stores in Units Sold", y = "Units Sold", x = "Store ID")
 ```
-```{r}
+```{r, echo=FALSE, results=FALSE}
 summary(top10Sales)
 ```
 
@@ -138,20 +138,20 @@ Hence, this is the data that will be presented to the General Manager Sales.
 
 Similarly, bottom10Sales variable withholds the sales record of the 10 least performing stores. 
 
-```{r}
+```{r, echo=FALSE}
 bottom10Sales <- head(storeSales %>% arrange(units_sold),10)
-bottom10Sales
+knitr::kable(head(bottom10Sales), "simple")
 ```
 
 Graph of Bottom 10 Stores.
 
-```{r}
+```{r, echo=FALSE}
 ggplot(data=bottom10Sales, aes(x= reorder(StoreID, units_sold), y=units_sold)) +
   geom_bar(stat="identity", fill="steelblue") +
   geom_text(aes(label=units_sold), vjust=1.6, color="white", size=3.5) +
   labs(title = "Bottom 10 Stores in Units Sold", y = "Units Sold", x = "Store ID")
 ```
-```{r}
+```{r, echo=FALSE, results=FALSE}
 summary(bottom10Sales)
 ```
 
@@ -160,106 +160,100 @@ However, the data and the visuals created above put a baseline for the Managemen
 
 
 
-Question 2.
+# Question 2.
 
 (a)
 
-i. Businesses these days have adapted the concept of overstocking for the purpose of satisfying customer needs in a specific period of time. But it turns out to be a costly process and requires high capital investment. Therefore, ir is very vital for companies to do an adequate stock control and handle inventory on issues in realtime. Hence, the Economic Order Quantity model (EOQ model) comes into existance. 
+i. Businesses these days have adapted the concept of overstocking for the purpose of satisfying customer needs in a specific period of time. But it turns out to be a costly process and requires high capital investment. Therefore, it is very vital for companies to do an adequate stock control and handle inventory on issues in realtime. Hence, the Economic Order Quantity model (EOQ model) comes into existance. 
 
 To perform the required analysis, first step is to filter the dataframe to include only the dates with 2012 with the product SkuID = 216233
 
-```{r}
+```{r, echo=FALSE}
 productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id == 216233)
-head(productSales2012)
+knitr::kable(head(productSales2012), "simple")
 ```
 
-k = setup cost
-A = number of items demanded per annum
-c = purchase cost per item
-h = holding cost per item per annum
-Q* = optimum order quantity (number of items)
-T = time between order = length of the inventory cycle = Q/A
 
-Step 2 is to calculate the total units sold by all the stores collectively over the year 2012.
-
-```{r}
+```{r, echo=FALSE, results=FALSE}
 A <- sum(productSales2012$units_sold) # Annual demand
 A
 ```
 
-Here, we got the total number of units sold by the store are 169591
+The total number of units sold by the stores in 2012 169,591 and we assume this is A, the annual demand. \newline
 
-Thus, the calculations performed aboves gives us the base to calculate the optimum order quantity (Q)
-
-```{r}
+```{r, echo=FALSE, results=FALSE}
 k <- 130 # ordering cost
 h <- 1.5 # holding cost
 Q <- sqrt((2*k*A) / h) # optimum order quantity 
 round(Q,0)
 ```
-optimum order quantity = 5422
+With the ordering cost being $130 and the holding cost being \$1.50, we can calculate the optimum order quantity to be 5422 units. \newline
 
-Find time between the orders
-```{r}
+```{r, echo=FALSE, results=FALSE}
 T <- 365 * sqrt(2*k/(A*h)) # inventory cycle 
 round(T,0)
 ```
-Time between the orders T aka Inventory cycle = 12
+The 5422 units will be ordered every 12 days given by the inventory cycle. \newline
 
-Find annual inventory cost
-```{r}
+```{r, echo=FALSE, results=FALSE}
 inv_cost_ann <- k*(A/Q) + h*(Q/2) # annual inventory cost
 inv_cost_ann
 ```
+
+The annual inventory cost adds up to \$8132.68 \newline
 
 To summarize the analysis above, there were 169591 units of this product was sold in 2012 and is assumed to be A, the number of items demanded per annum. Based on the 2012 sales, the company should order 5422 units of the product every 12 days. The annual inventory cost is $8132.68
 
 
 ii.
 
-S = maximum inventory level after outstanding backorders have been met
-
-Find backorder cost
-```{r}
+```{r, echo=FALSE, results=FALSE}
 p <- 0.05 * (k+h)
 p
 ```
-Find economic order quantity
-```{r}
+
+The backorder cost is 5% of the total price per unit, which calculates to $6.58 \newline
+
+```{r, echo=FALSE, results=FALSE}
 Q <- sqrt(2*k*A/h) * sqrt((p+h)/p)
 Q <- round(Q, 0)
 Q
 ```
 
-Find maximum level stock
-```{r}
+The optimum order quantity given this is 6008. \newline
+
+```{r, echo=FALSE, results=FALSE}
 S <- sqrt(2*k*A/h) * sqrt(p/(p+h))
 S <- round(S, 0)
 S
 ```
 
-Find optimum time between orders
-```{r}
+The maximum level of stock is 4892. \newline
+
+```{r, echo=FALSE, results=FALSE}
 t <- 365*Q/A
 t <- round(t,0)
 t
 ```
 
-Find in stock times
-```{r}
+The orders of 6008 units should be done every 13 days. \newline
+
+```{r, echo=FALSE, results=FALSE}
 t1 <- 365*(S/A)
 t1 <- round(t1,0)
 t1
 ```
 
-Find out of stock times
-```{r}
+There are 11 days every cycle where the product is in stock \newline
+
+```{r, echo=FALSE, results=FALSE}
 t2 <- t-t1
 t2
 ```
 
-Plot back order model
-```{r}
+There are 2 days every cycle where the product is out of stock \newline
+
+```{r, echo=FALSE}
 plot(0, xlim = c(0, 2*t), ylim = c(-Q+S, S), type = "n",
      xlab = "Time (days)", ylab = "Stock level",
      main = "Inventory cycles for product 216233")
@@ -269,222 +263,279 @@ segments(x0 = c(0,t), y0 = -Q+S, x1 = c(0,t), y1 = S)   # vertical
 segments(x0 = 0, y0 = 0, x1 = 2*t, y1 = 0)              # horizontal
 ```
 
+This is the plotted graph of the model described above. \newline
 
-Find proportion of time the company have to take backorders
-```{r}
+```{r, echo=FALSE, results=FALSE}
 round(100*(t-t1)/t,0)
 ```
+15% of the time, the company has to take backorders \newline
 
-
-Find total annual inventory cost
-```{r}
+```{r, echo=FALSE, results=FALSE}
 round(k*A/Q + h/2 * S^2/Q + p/2 * (Q-S)^2 /Q,2)
 ```
 
+The total annual inventory cost is $7338.55 \newline
 
-(b)
+
+## (b)
 
 i.
 
-```{r}
+These are the records of sales for product 216425 throughout 2012
+```{r, echo=FALSE}
 productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id == 216425)
-head(productSales2012)
+knitr::kable(head(productSales2012), "simple")
 ```
 
-
-Find weekly units sold
-```{r}
+These are some of the total units sold per week for product 216425 throughout 2012
+```{r, echo=FALSE}
 saleWeek <- productSales2012$week
 
 weeklySales <- aggregate(cbind(units_sold)~saleWeek,
              data=productSales2012,FUN=sum)
 
-weeklySales
+knitr::kable(head(weeklySales), "simple")
 ```
 
 
-Graph weekly units sold
-```{r}
-hist(weeklySales$units_sold, main = "Demand for product 216425", 
-xlab = "Weekly units sold")
-```
-
-```{r}
+```{r, echo=FALSE, results=FALSE}
 mean(weeklySales$units_sold)
 sd(weeklySales$units_sold)
 ```
 
-```{r}
+This is the histogram for the weekly demand for product 216425
+
+```{r, echo=FALSE}
+hist(weeklySales$units_sold, main = "Demand for product 216425", 
+xlab = "Weekly units sold")
+```
+
+The mean is 2057 with a standard deviation of 523
+
+```{r, echo=FALSE, results=FALSE}
 skewness(weeklySales$units_sold)
 kurtosis(weeklySales$units_sold)
 ```
 
-Based on the histogram, the distribution of demand seems to be normal. However, the skewness of the data is about -0.48 which is not very close 
-to 0. The negative value indicates that the data that are skewed left. In addition, the kurtosis is about 3.91 which is greater than 3, which tends to have heavier tails than the number distribution. So, before fitting, we need to conduct goodness-of-fit test.
+Based on the histogram, the distribution of demand seems to be normal. However, the skewness of the data is about -0.48 which is not very close to 0. The negative value indicates that the data that are skewed left. In addition, the kurtosis is about 3.91 which is greater than 3, which tends to have heavier tails than the number distribution. So, before fitting, we need to conduct goodness-of-fit test.
 
 
-```{r}
+```{r, echo=FALSE, results=FALSE}
 shapiro.test(weeklySales$units_sold)
 ```
 
-```{r}
+```{r, echo=FALSE, results=FALSE}
 lillie.test(weeklySales$units_sold)
 ```
 
 The p-value for both tests is higher 0.05, we accept null hypothesis that data come from a normal distribution.
 
-Fitting normal distribution
-```{r}
+\newpage
+
+## Fitting normal distribution
+```{r, echo=FALSE, results=FALSE}
 fitnorm <- fitdistr(weeklySales$units_sold, "normal")
 fitnorm
 ```
 
-Find reorder point
-```{r}
-qnorm(0.95, 2057, 518)
+```{r, echo=FALSE, results=FALSE}
+r <- round(qnorm(0.95, 2057, 518),0)
+r
 ```
 
-
-```{r}
+```{r, echo=FALSE}
 hist(weeklySales$units_sold, main = "Demand for product 216425", xlab = "Lead-Time Demand", prob = TRUE)
 
 curve(dnorm(x, 2057, 518), 
 from=0, to=3500,
 col="blue", lty=1, add=TRUE)
 
-segments(x0 = 2909, y0 = 0, x1 = 2909, y1 = 8e-4)   # vertical
+segments(x0 = r, y0 = 0, x1 = r, y1 = 8e-4, col = "red")   # reorder point
 ```
 
-This is the lead time demand distribution, a normal distribution with a mean of 2057 and a standard deviation of 518. The reorder point r of 2909 allows 5% chance of a stock-out.
+This is the lead time demand distribution, a normal distribution with a mean of 2057 and a standard deviation of 518. The reorder point r of 2909 (coloured red in the graph) allows 5% chance of a stock-out.
 
 
-Find annual demand
-```{r}
+```{r, echo=FALSE, results=FALSE}
 D <- 2057 * 52
 D
 ```
 
 The annual demand is the expected weekly demand multiplied by 52, the amount of weeks in a year, which is 106964
 
-
-Find optimal order quantity
-```{r}
+```{r, echo=FALSE, results=FALSE}
 co <- 20.5 # order cost
 ch <- 6.5  # holding cost
 Q <- round(sqrt(2 * D * co / ch), 0) # optimal order quantity
 Q
 ```
-The optimal order quantity is 821 units 
+
+```{r, echo=FALSE, results=FALSE}
+round(D/Q,0)
+```
+
+The optimal order quantity is 821 units and will be ordered 194 times during the year.
+
+
+Find the safety stock
+```{r, echo=FALSE, results=FALSE}
+Qs <- r - 2057
+Qs
+```
+
+An extra 852 units from the mean were bought as safety stock to avoid the products being out of stock. Roughly 95% of the time, the 2909 units will be able to satisfy demand during the lead time.
+
+```{r, echo=FALSE, results=FALSE}
+chnorm <- (Q*ch)/2   # holding cost (normal stock)
+chsafe <- (Qs*ch)    # holding cost (safety stock)
+ordcost <- (D*co)/ Q # orderding cost
+
+total_ann_cost <- chnorm + chsafe + ordcost # total annual cost
+total_ann_cost
+```
+The total annual cost is $10877.09
 
 ii.
 
-```{r}
-productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id == 216419)
-head(productSales2012)
+These are the records of sales for product 216419 throughout 2012
+
+```{r, echo=FALSE}
+productSales2012 <- sales %>% filter(week >= as.Date("2012-01-01"), week <= as.Date("2012-12-31"), sku_id ==  216419)
+knitr::kable(head(productSales2012), "simple")
 ```
 
 
-Find weekly units sold
-```{r}
+These are some of the total units sold per week for product 216419 through 2012
+```{r, echo=FALSE}
 saleWeek <- productSales2012$week
 
 weeklySales <- aggregate(cbind(units_sold)~saleWeek,
              data=productSales2012,FUN=sum)
 
-weeklySales
+knitr::kable(head(weeklySales), "simple")
 ```
 
 
-Graph weekly units sold
-```{r}
-hist(weeklySales$units_sold, main = "Demand for product 216419", 
-xlab = "Weekly units sold")
-```
-
-```{r}
+```{r, echo=FALSE, results=FALSE}
 mean(weeklySales$units_sold)
 sd(weeklySales$units_sold)
 ```
 
-```{r}
+The mean is 4582 with a standard deviation of 1273
+
+This is the histogram for the weekly demand for product 216419 throughout 2012
+
+```{r, echo=FALSE}
+hist(weeklySales$units_sold, main = "Demand for product  216419", 
+xlab = "Weekly units sold")
+```
+
+```{r, echo=FALSE, results=FALSE}
 skewness(weeklySales$units_sold)
 kurtosis(weeklySales$units_sold)
 ```
 
-Based on the histogram, the distribution of demand seems to be normal. However, the skewness of the data is about 2.18 which is not very close 
-to 0. The positive value indicates that the data that are skewed right. In addition, the kurtosis is about 9.64 which is greater than 3, which tends to have heavier tails than the number distribution. So, before fitting, we need to conduct goodness-of-fit test.
+Based on the histogram, the distribution of demand seems to be normal. However, the skewness of the data is about 2.18 which is not very close to 0. The positive value indicates that the data that are skewed right. In addition, the kurtosis is about 9.64 which is greater than 3, which tends to have heavier tails than the number distribution. So, before fitting, we need to conduct goodness-of-fit test.
 
 
-```{r}
+```{r, echo=FALSE, results=FALSE}
 shapiro.test(weeklySales$units_sold)
 ```
 
-```{r}
+```{r, echo=FALSE, results=FALSE}
 lillie.test(weeklySales$units_sold)
 ```
 
-The p-value for both tests is lower 0.05, we refuse the null hypothesis that data come from a normal distribution.
+The p-value for both tests is lower than 0.05, therefor we refuse the null hypothesis that data come from a normal distribution. Though this is the only available model we can use to calculate the other values and so is the best model we can use.
 
-Fitting normal distribution
-```{r}
+
+## Fitting normal distribution
+```{r, echo=FALSE, results=FALSE}
 fitnorm <- fitdistr(weeklySales$units_sold, "normal")
 fitnorm
 ```
 
-```{r}
-hist(weeklySales$units_sold, main = "Demand for product 216425", xlab = "Weekly units sold", prob = TRUE)
-
-curve(dnorm(x, fitnorm$estimate[1], fitnorm$estimate[2]), 
-from=0, to=max(weeklySales$units_sold),
-col="blue", lty=1, add=TRUE)
+```{r, echo=FALSE, results=FALSE}
+r <- round(qnorm(0.95, 4582, 1260),0)
+r
 ```
 
-This is the lead time demand distribution, a normal distribution with a mean of 4582 and a standard deviation of 1260.
+```{r, echo=FALSE}
+hist(weeklySales$units_sold, main = "Demand for product 216419", xlab = "Lead-Time Demand", prob = TRUE)
 
+curve(dnorm(x, 4582, 1260), 
+from=0, to=10000,
+col="blue", lty=1, add=TRUE)
 
-Find annual demand
-```{r}
+segments(x0 = r, y0 = 0, x1 = r, y1 = 8e-4, col = "red")   # reorder point
+```
+
+This is the lead time demand distribution, a normal distribution with a mean of 4582 and a standard deviation of 518. The reorder point r of 6655 (coloured red in the graph) allows 5% chance of a stock-out.
+
+```{r, echo=FALSE, results=FALSE}
 D <- 4582 * 52
 D
 ```
 
 The annual demand is the expected weekly demand multiplied by 52, the amount of weeks in a year, which is 106964
 
-
-Find optimal order quantity
-```{r}
+```{r, echo=FALSE, results=FALSE}
 co <- 20.5 # order cost
 ch <- 6.5  # holding cost
 Q <- round(sqrt(2 * D * co / ch), 0) # optimal order quantity
 Q
 ```
 
+```{r, echo=FALSE, results=FALSE}
+round(D/Q,0)
+```
 
-Question 3.
+The optimal order quantity is 1226 units and will be ordered 194 times during the year.
+
+```{r, echo=FALSE, results=FALSE}
+Qs <- r - 4582
+Qs
+```
+
+An extra 2073 units from the mean were bought as safety stock to avoid the products being out of stock. Roughly 95% of the time, the 2909 units will be able to satisfy demand during the lead time.
+
+```{r, echo=FALSE, results=FALSE}
+chnorm <- (Q*ch)/2   # holding cost (normal stock)
+chsafe <- (Qs*ch)    # holding cost (safety stock)
+ordcost <- (D*co)/Q # orderding cost
+
+total_ann_cost <- chnorm + chsafe + ordcost # total annual cost
+total_ann_cost
+```
+
+The total annual cost is $21,443.02
+
+
+# Question 3.
 
 a. Load the review data file from the repository. 
 
-```{r}
+```{r, echo=FALSE}
 review <- read.csv(file = 'STAT702_project_reviews_data.csv')
 review <- as_tibble(review)
-head(review)
+knitr::kable(head(review), "simple")
 ```
 
 Filter the product B00005249G (asin) assigned to our group
 
-```{r}
+```{r, echo=FALSE, results=FALSE}
 review <- review
 selectedProduct <- review %>% filter(asin == "B00005249G")
-selectedProduct
+knitr::kable(head(selectedProduct), "simple")
 ```
 
-```{r}
+```{r, echo=FALSE, results=FALSE}
 summary(selectedProduct)
 ```
 
 ggplot the overall review ratings for the product.
 
-```{r}
+```{r, echo=FALSE}
 ggplot(selectedProduct, aes(overall)) + 
   geom_bar() +
   ggtitle("Overall Review Rating for Product ID: B00005249G")
@@ -501,27 +552,16 @@ Looking the plot above, majority of the customers rated 5 follwed by a few 4 the
 Reading the selectedProduct in data variable and creating a column to record each row number.
 
 
-```{r}
+```{r, echo=FALSE, results=FALSE}
 data <- selectedProduct %>%
 mutate(linenumber = row_number());
-head(data)
-```
-
-Install and load tidytext to clean and tidy text data
-
-```{r}
-install.packages('tidytext')
-```
-
-
-```{r}
-library(tidytext)
+knitr::kable(head(data), "simple")
 ```
 
 
 Tokenization: “A token is a meaningful unit of text, most often a word, that we are interested in using for further analysis, and tokenization is the process of splitting text into tokens.” [Silge and Robinson, ]
 
-```{r}
+```{r, echo=FALSE}
 selectedProduct %>%
 unnest_tokens(output = word, input = reviewText) -> tokenised_data
 ```
@@ -529,7 +569,7 @@ unnest_tokens(output = word, input = reviewText) -> tokenised_data
 Removing stopwords.
 Stop words are the “little” words like “the”, “of”, “to” etc
 
-```{r}
+```{r, echo=FALSE, results=FALSE, message=FALSE}
 tokenised_data %>%
   group_by(document.id) %>% 
   ungroup() %>% 
@@ -539,7 +579,7 @@ tokenised_data %>%
 
 Plotting the cleanData after it's tidy enough for analysis.
 
-```{r}
+```{r, echo=FALSE}
 cleanData %>% count(word, sort = TRUE) %>% filter(n > 100) %>% mutate(word =  reorder(word, n)) %>% 
 ggplot(aes (word, n)) +
   geom_col() +
@@ -553,7 +593,7 @@ Looking at the plot above, there are the most common used words in the reviewTex
 
 Word cloud of frequently used words.
 
-```{r}
+```{r, echo=FALSE}
 #word Cloud
 
 cleanData %>%
@@ -566,7 +606,7 @@ with(wordcloud(word, n, max.words = 100))
 Sentiment Analysis - Allocate sentiment to each word using bing. Sentimental analysis helps to shows if the users/customers are happy with the product experience or not. Here, we categorized the sentiments as a set of negative and positive words.
 
 
-```{r}
+```{r, echo=FALSE, message=FALSE}
 
 # Sentiment allocation to each word
 cleanData %>% 
@@ -593,7 +633,7 @@ The above graph shows the sentiment analysis contribution of the Negative words 
 On the other hand, love is the positive word being used the most over 100 times followed nice, smooth, fine, smoothly, perfect, favourite happy etc. 
 
 
-```{r}
+```{r, echo=FALSE}
 sentiment_data %>% 
   ggplot() +
   geom_bar(aes(x = overall, fill = sentiment), position = "fill") +
@@ -610,7 +650,7 @@ Therefore, to get an overview of the words, we will create a sentiment word clou
 
 Word cloud using the negative and positive words.
 
-```{r}
+```{r, echo=FALSE}
 cleanData %>%
 inner_join(get_sentiments("bing"), by = "word") %>%
 count(word, sentiment, sort = TRUE) %>%
@@ -622,8 +662,16 @@ max.words = 100, title.size = 2)
 ```
 
 The words cloud shows the most used keywords within in the reviewText section. It correspond to the  an overview of the words that were used in the reviewText and it saves GM time to manually go through each remove comment. It shows if the customers are happy and satisfied with the product or not. And also give a general trend of why customer's are liking the product vs what are the areas to be considered for future decision strategy plannings. A lot of companies use "NPS" known as Net promoter score to gaage their customer satisfaction. This should give a wider view of the reviews to the management.
+
 In conclusion, we can say that most of the customers are loving the product and gave out good ratings.
 
+# Appendix A: Individual Contribution Statement
+
+Carlo Carbonilla 50% \newline
+Carlo did question two and the code for question one.
+
+Pankaj Prashar 50% \newline
+Pankaj did question three and the report writing for question one.
 
 
 

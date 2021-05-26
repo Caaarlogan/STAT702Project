@@ -359,12 +359,12 @@ ggplot(selectedProduct, aes(overall)) +
 
 Looking the plot above, majority of the customers rated 5 follwed by a few 4 then 3, 2 and down to 1. The dataset contained total 1,430 rows and each row withholds a customer rating on a scale of 1 to 5. 5 being the product is of good quality (use) and 1 being not satistied with the product experience. over 1000 customers selected 5 followed by over 160 selected 4 and so on. The mean review ratings is 4.669
 
-                                                                                                                                                                                       :   8  
+
  
 
-3b)
+3b) As per requirements, this task requires analyzing the reviewText column and provide some trends to the GM.
 
-Start here:
+Reading the selectedProduct in data variable and creating a column to record each row number.
 
 
 ```{r}
@@ -373,10 +373,11 @@ mutate(linenumber = row_number());
 head(data)
 ```
 
+Install and load tidytext to clean and tidy text data
+
 ```{r}
 install.packages('tidytext')
 ```
-
 
 
 ```{r}
@@ -384,15 +385,15 @@ library(tidytext)
 ```
 
 
-Tokenization
+Tokenization: “A token is a meaningful unit of text, most often a word, that we are interested in using for further analysis, and tokenization is the process of splitting text into tokens.” [Silge and Robinson, ]
 
 ```{r}
 selectedProduct %>%
 unnest_tokens(output = word, input = reviewText) -> tokenised_data
 ```
 
-
-
+Removing stopwords.
+Stop words are the “little” words like “the”, “of”, “to” etc
 
 ```{r}
 tokenised_data %>%
@@ -402,25 +403,33 @@ tokenised_data %>%
   
 ```
 
+Plotting the cleanData after it's tidy enough for analysis.
 
 ```{r}
 cleanData %>% count(word, sort = TRUE) %>% filter(n > 100) %>% mutate(word =  reorder(word, n)) %>% 
 ggplot(aes (word, n)) +
-  geom_col()
+  geom_col() +
+  ggtitle("All the words with the used frequency over 100")
 
+  
+```
+
+Looking at the plot above, there are the most common used words in the reviewText section. "Pens" being mentioned the most for over 900 times where as "pen" being the second most counts about 400 times. On the other hand, words like "box", "cheap", "wiriting" were used just over 100 times.
+
+
+Word cloud of frequently used words.
+
+```{r}
 #word Cloud
 
 cleanData %>%
 count(word) %>%
 with(wordcloud(word, n, max.words = 100))
-
   
 ```
 
-Words with the frequency over 100
 
-
-Allocate sentiment to each word using bing.
+Sentiment Analysis - Allocate sentiment to each word using bing. Sentimental analysis helps to shows if the users/customers are happy with the product experience or not. Here, we categorized the sentiments as a set of negative and positive words.
 
 
 ```{r}
@@ -428,7 +437,7 @@ Allocate sentiment to each word using bing.
 # Sentiment allocation to each word
 cleanData %>% 
   inner_join(get_sentiments("bing"),  by = c("word"  = "word")) %>%
-  count(word, sentiment, sort = TRUE)  -> sentiment_data
+  count(word, sentiment, overall, sort = TRUE)  -> sentiment_data
 
 # Plot positive/negative words
 sentiment_data %>% 
@@ -446,6 +455,27 @@ sentiment_data %>%
 
 ```
 
+The above graph shows the sentiment analysis contribution of the Negative words on left hand side and the positive words on the right hand side. Here, we can see that cheap is the word classified as negative which in reality could be a positive expression like a product is cleap compare to other markets. Other ones are like, hard, lose, wrong, expensive, losing, leak, bad, lost, complaints. This gives indication to the GM on what are focus areas.
+On the other hand, love is the positive word being used the most over 100 times followed nice, smooth, fine, smoothly, perfect, favourite happy etc. 
+
+
+```{r}
+sentiment_data %>% 
+  ggplot() +
+  geom_bar(aes(x = overall, fill = sentiment), position = "fill") +
+  ggtitle("Positive and negative sentiment ratio") +
+  xlab("Overall Rating") +
+  ylab("Sentiment ratio")
+
+```
+
+From the alove analyis, we can see that the sentiment analysis works well for the negative words but not so well for the positive works, 
+
+Therefore, to get an overview of the words, we will create a sentiment word cloud.
+
+
+Word cloud using the negative and positive words.
+
 ```{r}
 cleanData %>%
 inner_join(get_sentiments("bing"), by = "word") %>%
@@ -456,6 +486,11 @@ title.colors=c("darkred", "darkgreen"),
 max.words = 100, title.size = 2)
 
 ```
+
+The words cloud shows the most used keywords within in the reviewText section. It correspond to the  an overview of the words that were used in the reviewText and it saves GM time to manually go through each remove comment. It shows if the customers are happy and satisfied with the product or not. And also give a general trend of why customer's are liking the product vs what are the areas to be considered for future decision strategy plannings. A lot of companies use "NPS" known as Net promoter score to gaage their customer satisfaction. This should give a wider view of the reviews to the management.
+In conclusion, we can say that most of the customers are loving the product and gave out good ratings.
+
+
 
 
 

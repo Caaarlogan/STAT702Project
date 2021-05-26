@@ -11,9 +11,12 @@ Load the required Packages.
 
 ```{r}
 #Loading the Packages
+install.packages("dplyr")
 library(dplyr)
+install.packages("tidyverse")
 library(tidyverse)
 library(lubridate)
+install.packages("lubridate")
 ```
 
 Question 1. 
@@ -326,14 +329,14 @@ hist(weeklySales$units_sold)
 
 Question 3.
 
-Load the data
+Load the review data file from the repository. 
 
 ```{r}
 review <- read.csv(file = 'STAT702_project_reviews_data.csv')
 head(review)
 ```
 
-Filter the product given to our group
+Filter the product B00005249G (asin) assigned to our group
 
 ```{r}
 selectedProduct <- review %>% filter(asin == "B00005249G")
@@ -344,6 +347,7 @@ selectedProduct
 summary(selectedProduct)
 ```
 
+ggplot the overall review ratings for the product.
 
 ```{r}
 ggplot(selectedProduct, aes(overall)) + 
@@ -352,9 +356,10 @@ ggplot(selectedProduct, aes(overall)) +
 ```
 
 
-Explanation:
+Looking the plot above, majority of the customers rated 5 follwed by a few 4 then 3, 2 and down to 1. The dataset contained total 1,430 rows and each row withholds a customer rating on a scale of 1 to 5. 5 being the product is of good quality (use) and 1 being not satistied with the product experience. Out of which 458 customers selected 5 followed by 73 selected 4 and so on. The mean review ratings is 4.669
 
-
+                                                                                                                                                                                       :   8  
+ 
 
 3b)
 
@@ -368,15 +373,13 @@ head(data)
 ```
 
 ```{r}
-library(tidytext)
+install.packages('tidytext')
 ```
 
 
 
 ```{r}
-data <- selectedProduct %>%
-mutate(linenumber = row_number());
-head(data)
+library(tidytext)
 ```
 
 

@@ -462,7 +462,7 @@ Q
 
 Question 3.
 
-Load the review data file from the repository. 
+a. Load the review data file from the repository. 
 
 ```{r}
 review <- read.csv(file = 'STAT702_project_reviews_data.csv')
